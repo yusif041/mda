@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mənzil Seçimi Portalı</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 650px;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin: 0 auto;
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+            font-size: 15px;
+            background-color: #fff;
+            box-sizing: border-box;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .btn:disabled, .btn.disabled {
+            background-color: #cccccc !important;
+            cursor: not-allowed;
+        }
+
+        /* Option Buttons Step 2 */
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        .option-btn {
+            padding: 14px;
+            border: 2px solid #007bff;
+            background: white;
+            color: #007bff;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+        }
+        .option-btn.selected {
+            background-color: #007bff;
+            color: white;
+        }
+
+        /* Modal / Question Box */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .modal-box {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .modal-box h3 {
+            margin-top: 0;
+        }
+        .modal-box p {
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        /* Table-like Element Styles */
+        .results-container {
+            display: none;
+            margin-top: 25px;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .results-table div.tr {
+            display: flex;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .results-table div.th {
+            font-weight: bold;
+            background-color: #e9ecef;
+            padding: 10px;
+            flex: 1;
+            text-align: center;
+        }
+        .apartment-row {
+            display: flex;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+        .apartment-row:hover {
+            background-color: #e2e6ea;
+        }
+        .apartment-row div.td {
+            padding: 12px 10px;
+            flex: 1;
+            text-align: center;
+        }
+
+        /* Floor Plan Container */
+        .plan-img {
+            width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- PAGE 1: Start Test -->
+    <div id="page-1" class="page active">
+        <h2>Test Portalı</h2>
+        <button class="btn btn-primary" onclick="goToStep2()">Start Test</button>
+    </div>
+
+    <!-- PAGE 2: Complex Selection -->
+    <div id="page-2" class="page">
+        <div class="form-group">
+            <label for="complex-select">Komplekslər</label>
+            <select id="complex-select" onchange="handleComplexChange()">
+                <option value="">Seçin</option>
+                <option value="Sirvan">Şirvan</option>
+                <option value="lenkeran">Lənkəran</option>
+                <option value="yevlax">Yevlax</option>
+            </select>
+        </div>
+        <button id="novbeti-step2" class="btn btn-primary disabled" disabled onclick="triggerModalForStep2()">Növbəti</button>
+    </div>
+
+    <!-- PAGE 3: Payment Type Selection -->
+    <div id="page-3" class="page">
+        <h3>Ödəniş Üsulunu Seçin</h3>
+        <div class="option-group">
+            <button class="option-btn" onclick="selectPaymentOption(this)">Öz vəsaiti hesabına</button>
+            <button class="option-btn" onclick="selectPaymentOption(this)">İpoteka hesabına</button>
+        </div>
+        <button id="novbeti-step3" class="btn btn-primary disabled" disabled onclick="triggerModalForStep3()">Növbəti</button>
+    </div>
+
+    <!-- PAGE 4: Mənzil Axtarışı -->
+    <div id="page-4" class="page">
+        <h2 style="margin-top: 0; margin-bottom: 25px; font-size: 28px;">Mənzil Axtarışı</h2>
+
+        <div class="form-group">
+            <label>Bina nömrəsi</label>
+            <select id="bina">
+                <option value="">Seçin</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Giriş nömrəsi</label>
+            <select id="giris">
+                <option value="">Seçin</option>
+                <option value="111">111</option>
+                <option value="222">222</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Mərtəbə nömrəsi</label>
+            <select id="mertebe">
+                <option value="">Seçin</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Mənzil nömrəsi</label>
+            <select id="menzil">
+                <option value="">Seçin</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+            </select>
+        </div>
+
+        <button class="btn btn-primary" style="margin-top: 15px;" onclick="triggerModalForStep4()">Axtar</button>
+
+        <!-- Table-like Element Results -->
+        <div id="results-container" class="results-container">
+            <h3 style="margin-bottom: 10px;">Axtarış Nəticələri</h3>
+            <div class="results-table">
+                <div class="tr">
+                    <div class="th">Bina</div>
+                    <div class="th">Giriş</div>
+                    <div class="th">Mərtəbə</div>
+                    <div class="th">Mənzil</div>
+                </div>
+                <a class="apartment-row row" onclick="goToStep5()">
+                    <div class="td" id="res-bina">16</div>
+                    <div class="td" id="res-giris">111</div>
+                    <div class="td" id="res-mertebe">9</div>
+                    <div class="td" id="res-menzil">1</div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 5: Apartment Floor Plan -->
+    <div id="page-5" class="page">
+        <h2 style="margin-top: 0; margin-bottom: 20px; font-size: 24px;">Seçilmiş Mənzil Planı</h2>
+
+        <img src="plan.jpg" alt="Mənzil Planı" class="plan-img">
+
+        <button class="btn btn-secondary" onclick="goToStep4()">Geri</button>
+    </div>
+
+</div>
+
+<!-- QUESTION BOX / MODAL -->
+<div id="question-modal" class="modal-overlay role-dialog" role="dialog">
+    <div class="modal-box modal-dialog">
+        <h3>Sual / Təsdiq</h3>
+        <p>Davam etmək istədiyinizdən əminsiniz?</p>
+        <button id="modal-confirm-btn" class="btn btn-primary">Təsdiq Et</button>
+    </div>
+</div>
+
+<script>
+    let pendingAction = null;
+
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+    }
+
+    function openModal(actionFunction) {
+        pendingAction = actionFunction;
+        document.getElementById('question-modal').style.display = 'flex';
+    }
+
+    document.getElementById('modal-confirm-btn').addEventListener('click', function() {
+        document.getElementById('question-modal').style.display = 'none';
+        if (typeof pendingAction === 'function') {
+            pendingAction();
+        }
+    });
+
+    function goToStep2() {
+        showPage('page-2');
+    }
+
+    function handleComplexChange() {
+        const select = document.getElementById('complex-select');
+        const novbetiBtn = document.getElementById('novbeti-step2');
+
+        if (select.value !== '') {
+            novbetiBtn.disabled = false;
+            novbetiBtn.classList.remove('disabled');
+        } else {
+            novbetiBtn.disabled = true;
+            novbetiBtn.classList.add('disabled');
+        }
+    }
+
+    // Step 2 Növbəti Trigger
+    function triggerModalForStep2() {
+        openModal(function() {
+            showPage('page-3');
+        });
+    }
+
+    function selectPaymentOption(btnElement) {
+        document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+        btnElement.classList.add('selected');
+
+        const novbetiBtn = document.getElementById('novbeti-step3');
+        novbetiBtn.disabled = false;
+        novbetiBtn.classList.remove('disabled');
+    }
+
+    // Step 3 Növbəti Trigger
+    function triggerModalForStep3() {
+        openModal(function() {
+            showPage('page-4');
+        });
+    }
+
+    function goToStep4() {
+        showPage('page-4');
+    }
+
+    // Step 4 Axtar Trigger
+    function triggerModalForStep4() {
+        openModal(function() {
+            handleSearch();
+        });
+    }
+
+    function handleSearch() {
+        const bina = document.getElementById('bina').value || "16";
+        const giris = document.getElementById('giris').value || "111";
+        const mertebe = document.getElementById('mertebe').value || "9";
+        const menzil = document.getElementById('menzil').value || "1";
+
+        document.getElementById('res-bina').innerText = bina;
+        document.getElementById('res-giris').innerText = giris;
+        document.getElementById('res-mertebe').innerText = mertebe;
+        document.getElementById('res-menzil').innerText = menzil;
+
+        document.getElementById('results-container').style.display = 'block';
+    }
+
+    // Go to Floor Plan view when clicking the table-like row
+    function goToStep5() {
+        showPage('page-5');
+    }
+</script>
+</body>
+</html>
